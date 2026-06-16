@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# env / local
+.env
+.env.local
+.DS_Store
+
+# brainstorm visual companion
+.superpowers/
+
+# spec / design docs (kept local, not committed)
+docs/
