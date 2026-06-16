@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSortedPosts } from '../../lib/posts';
+
+const posts = await getSortedPosts();
+const counts = new Map<string, number>();
+for (const p of posts) for (const t of p.data.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+const tags = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="tags · jitu.dev" description="All tags">
+  <h1 class="page-title"><span class="prompt">$</span> ls tags/</h1>
+  <ul class="taglist">
+    {tags.map(([tag, n]) => (
+      <li><a class="tag" href={`${base}tags/${tag}/`}>{tag}</a> <span class="muted">{n}</span></li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  .page-title { font-size: 1.2rem; margin-bottom: 1.5rem; }
+  .taglist { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 1rem; }
+  .taglist li { display: flex; align-items: center; gap: 0.4rem; }
+</style>

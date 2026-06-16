@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getSortedPosts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getSortedPosts();
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { tag, posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }));
+}
+const { tag, posts } = Astro.props;
+---
+<BaseLayout title={`#${tag} · jitu.dev`} description={`Posts tagged ${tag}`}>
+  <h1 class="page-title"><span class="prompt">$</span> grep -l "{tag}" posts/</h1>
+  {posts.map((post) => <PostCard post={post} />)}
+</BaseLayout>
+
+<style>
+  .page-title { font-size: 1.2rem; margin-bottom: 1.5rem; }
+</style>
