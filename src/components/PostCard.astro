@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib/posts';
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+const base = import.meta.env.BASE_URL;
+---
+<article class="post-card">
+  <a class="title" href={`${base}posts/${post.id}/`}>
+    <span class="arrow">→</span> {post.data.title}
+  </a>
+  <div class="meta">
+    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+    {post.data.tags.map((t) => (
+      <a class="tag" href={`${base}tags/${t}/`}>{t}</a>
+    ))}
+  </div>
+  <p class="desc">{post.data.description}</p>
+</article>
+
+<style>
+  .post-card { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .title { font-family: var(--font-mono); font-weight: 600; color: var(--text); font-size: 1.05rem; }
+  .title:hover { color: var(--cyan); text-decoration: none; }
+  .arrow { color: var(--green); }
+  .meta { display: flex; align-items: center; gap: 0.6rem; margin: 0.35rem 0; flex-wrap: wrap; font-size: 0.8rem; }
+  .desc { color: var(--muted); margin: 0.25rem 0 0; font-family: var(--font-body); }
+</style>
