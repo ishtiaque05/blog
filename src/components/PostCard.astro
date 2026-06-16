@@ -11,7 +11,7 @@ const base = import.meta.env.BASE_URL;
   <div class="meta">
     <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
     {post.data.tags.map((t) => (
-      <a class="tag" href={`${base}tags/${t}/`}>{t}</a>
+      <a class="tag" href={`${base}tags/${encodeURIComponent(t)}/`}>{t}</a>
     ))}
   </div>
   <p class="desc">{post.data.description}</p>

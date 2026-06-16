@@ -21,7 +21,7 @@ const readMin = Math.max(1, Math.round(words / 200));
       <div class="meta">
         <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
         <span>· {readMin} min read</span>
-        {post.data.tags.map((t) => <a class="tag" href={`${base}tags/${t}/`}>{t}</a>)}
+        {post.data.tags.map((t) => <a class="tag" href={`${base}tags/${encodeURIComponent(t)}/`}>{t}</a>)}
       </div>
     </header>
     <div class="prose">

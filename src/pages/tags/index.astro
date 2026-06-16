@@ -12,7 +12,7 @@ const base = import.meta.env.BASE_URL;
   <h1 class="page-title"><span class="prompt">$</span> ls tags/</h1>
   <ul class="taglist">
     {tags.map(([tag, n]) => (
-      <li><a class="tag" href={`${base}tags/${tag}/`}>{tag}</a> <span class="muted">{n}</span></li>
+      <li><a class="tag" href={`${base}tags/${encodeURIComponent(tag)}/`}>{tag}</a> <span class="muted">{n}</span></li>
     ))}
   </ul>
 </BaseLayout>

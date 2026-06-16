@@ -18,7 +18,7 @@
         navigator.clipboard.writeText(code).then(function () {
           btn.textContent = 'copied';
           setTimeout(function () { btn.textContent = 'copy'; }, 1500);
-        });
+        }).catch(function () {});
       });
       bar.appendChild(btn);
       pre.parentNode.insertBefore(wrap, pre);
