@@ -1,0 +1,41 @@
+---
+---
+<script is:inline>
+  (function () {
+    document.querySelectorAll('pre.astro-code').forEach(function (pre) {
+      if (pre.parentElement && pre.parentElement.classList.contains('code-window')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'code-window';
+      const bar = document.createElement('div');
+      bar.className = 'code-bar';
+      bar.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.type = 'button';
+      btn.textContent = 'copy';
+      btn.addEventListener('click', function () {
+        const code = pre.innerText;
+        navigator.clipboard.writeText(code).then(function () {
+          btn.textContent = 'copied';
+          setTimeout(function () { btn.textContent = 'copy'; }, 1500);
+        });
+      });
+      bar.appendChild(btn);
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(bar);
+      wrap.appendChild(pre);
+    });
+  })();
+</script>
+
+<style is:global>
+  .code-window { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 1.4rem 0; }
+  .code-bar { display: flex; align-items: center; gap: 6px; padding: 0.5rem 0.75rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .code-bar .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .code-bar .copy-btn {
+    margin-left: auto; font-family: var(--font-mono); font-size: 0.72rem;
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 8px; cursor: pointer;
+  }
+  .code-bar .copy-btn:hover { color: var(--green); border-color: var(--green); }
+</style>
