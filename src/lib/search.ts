@@ -65,3 +65,24 @@ export function hasErrors(query: Query): string[] {
   }
   return bad;
 }
+
+export function matchPost(entry: IndexEntry, query: Query): boolean {
+  if (query.length === 0) return true;
+  return query.some((group) => group.every((term) => matchTerm(entry, term)));
+}
+
+function matchTerm(entry: IndexEntry, term: Term): boolean {
+  switch (term.kind) {
+    case 'tag':
+      return entry.tags.some((t) => t.toLowerCase() === term.value);
+    case 'text':
+    case 'phrase':
+      return entry.text.includes(term.value);
+    case 'after':
+      return entry.date >= term.date;
+    case 'before':
+      return entry.date <= term.date;
+    case 'error':
+      return false;
+  }
+}

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseQuery, hasErrors } from './search';
+import { matchPost, type IndexEntry } from './search';
 
 describe('parseQuery', () => {
   it('returns no groups for an empty string', () => {
@@ -62,5 +63,58 @@ describe('parseQuery', () => {
       'before:also-bad',
     ]);
     expect(hasErrors(parseQuery('tag:linux'))).toEqual([]);
+  });
+});
+
+const post: IndexEntry = {
+  id: 'p',
+  url: '/blog/posts/p/',
+  title: 'WiFi kernel debugging',
+  description: 'smbios woes',
+  tags: ['linux', 'wifi'],
+  date: '2026-06-25',
+  text: 'wifi kernel debugging smbios woes linux wifi',
+};
+
+describe('matchPost', () => {
+  it('matches everything when the query is empty', () => {
+    expect(matchPost(post, parseQuery(''))).toBe(true);
+  });
+
+  it('matches a tag case-insensitively', () => {
+    expect(matchPost(post, parseQuery('tag:LINUX'))).toBe(true);
+    expect(matchPost(post, parseQuery('tag:bluetooth'))).toBe(false);
+  });
+
+  it('ANDs terms within a group', () => {
+    expect(matchPost(post, parseQuery('tag:linux kernel'))).toBe(true);
+    expect(matchPost(post, parseQuery('tag:linux missing'))).toBe(false);
+  });
+
+  it('ORs across groups', () => {
+    expect(matchPost(post, parseQuery('tag:bluetooth OR tag:wifi'))).toBe(true);
+    expect(matchPost(post, parseQuery('tag:bluetooth OR tag:android'))).toBe(false);
+  });
+
+  it('matches free text against the body haystack', () => {
+    expect(matchPost(post, parseQuery('smbios'))).toBe(true);
+  });
+
+  it('applies after/before inclusively on the boundary', () => {
+    expect(matchPost(post, parseQuery('after:2026-06-25'))).toBe(true);
+    expect(matchPost(post, parseQuery('after:2026-06-26'))).toBe(false);
+    expect(matchPost(post, parseQuery('before:2026-06-25'))).toBe(true);
+    expect(matchPost(post, parseQuery('before:2026-06-24'))).toBe(false);
+  });
+
+  it('never matches an error term', () => {
+    expect(matchPost(post, parseQuery('after:bad'))).toBe(false);
+  });
+
+  it('honors AND-tighter-than-OR precedence', () => {
+    // (linux AND missing) OR bluetooth  -> both groups fail
+    expect(matchPost(post, parseQuery('tag:linux missing OR tag:bluetooth'))).toBe(false);
+    // (linux AND kernel) OR bluetooth -> first group matches
+    expect(matchPost(post, parseQuery('tag:linux kernel OR tag:bluetooth'))).toBe(true);
   });
 });
