@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="search · syed.dev" description="Search posts">
+  <h1 class="page-title"><span class="prompt">$</span> search posts/</h1>
+
+  <div class="search-bar">
+    <span class="prompt">&gt;</span>
+    <input
+      id="q"
+      type="text"
+      autocomplete="off"
+      autofocus
+      placeholder="tag:linux kernel after:2026-01-01"
+      aria-label="Search query"
+    />
+  </div>
+
+  <p id="status" class="status" aria-live="polite"></p>
+  <div id="results"></div>
+
+  <details class="hints">
+    <summary>query syntax</summary>
+    <ul>
+      <li><code>tag:linux</code> &mdash; posts with a tag</li>
+      <li><code>after:2026-01-01</code> / <code>before:2026-12-31</code> &mdash; date range</li>
+      <li><code>kernel</code> &mdash; free text (title, description, tags, body)</li>
+      <li><code>"spatial streams"</code> &mdash; exact phrase</li>
+      <li><code>OR</code> &mdash; separates groups; terms in a group are AND'd; AND binds tighter than OR</li>
+    </ul>
+    <p class="eg">e.g. <code>tag:linux tag:wifi OR tag:bluetooth after:2026-01-01</code></p>
+  </details>
+
+  <noscript><p class="status">Search requires JavaScript.</p></noscript>
+</BaseLayout>
+
+<script>
+  import { parseQuery, matchPost, hasErrors, type IndexEntry } from '../lib/search';
+
+  const base = import.meta.env.BASE_URL;
+  const input = document.getElementById('q') as HTMLInputElement;
+  const results = document.getElementById('results')!;
+  const status = document.getElementById('status')!;
+
+  let index: IndexEntry[] = [];
+
+  function esc(s: string): string {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function render(entries: IndexEntry[], errors: string[]) {
+    const count = `matched ${entries.length} post${entries.length === 1 ? '' : 's'}`;
+    status.textContent = errors.length
+      ? `ignoring invalid token(s): ${errors.join(', ')} · ${count}`
+      : count;
+    if (!entries.length) {
+      results.innerHTML = '<p class="status">no posts matched</p>';
+      return;
+    }
+    results.innerHTML = entries
+      .map(
+        (e) => `
+      <article class="post-card">
+        <a class="title" href="${e.url}"><span class="arrow">&rarr;</span> ${esc(e.title)}</a>
+        <div class="meta">
+          <time datetime="${e.date}">${e.date}</time>
+          ${e.tags
+            .map(
+              (t) =>
+                `<a class="tag" href="${base}tags/${encodeURIComponent(t)}/">${esc(t)}</a>`,
+            )
+            .join('')}
+        </div>
+        <p class="desc">${esc(e.description)}</p>
+      </article>`,
+      )
+      .join('');
+  }
+
+  function run(q: string) {
+    const query = parseQuery(q);
+    const matched = index.filter((e) => matchPost(e, query));
+    render(matched, hasErrors(query));
+    const url = new URL(location.href);
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
+    history.replaceState(null, '', url);
+  }
+
+  async function init() {
+    try {
+      const res = await fetch(`${base}search-index.json`);
+      if (!res.ok) throw new Error(String(res.status));
+      index = await res.json();
+    } catch {
+      status.textContent = 'failed to load search index';
+      return;
+    }
+    const q0 = new URLSearchParams(location.search).get('q') ?? '';
+    input.value = q0;
+    run(q0);
+    input.addEventListener('input', () => run(input.value));
+  }
+
+  init();
+</script>
+
+<style>
+  .page-title { font-size: 1.3rem; margin-bottom: 1.5rem; }
+  .search-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--border); padding: 0.5rem 0.7rem;
+  }
+  .search-bar .prompt { color: var(--green); }
+  .search-bar input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: var(--font-mono); font-size: 1rem;
+  }
+  .status { color: var(--muted); font-size: 0.8rem; margin: 0.6rem 0; }
+  .hints { margin-top: 2rem; color: var(--muted); font-size: 0.85rem; }
+  .hints summary { cursor: pointer; color: var(--cyan); }
+  .hints code { color: var(--text); }
+  .hints .eg { margin-top: 0.5rem; }
+</style>
