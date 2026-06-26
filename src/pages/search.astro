@@ -63,7 +63,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .map(
         (e) => `
       <article class="post-card">
-        <a class="title" href="${e.url}"><span class="arrow">&rarr;</span> ${esc(e.title)}</a>
+        <a class="title" href="${esc(e.url)}"><span class="arrow">&rarr;</span> ${esc(e.title)}</a>
         <div class="meta">
           <time datetime="${e.date}">${e.date}</time>
           ${e.tags
