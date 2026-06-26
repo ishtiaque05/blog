@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 }
 const { tag, posts } = Astro.props;
 ---
-<BaseLayout title={`#${tag} · jitu.dev`} description={`Posts tagged ${tag}`}>
+<BaseLayout title={`#${tag} · syed.dev`} description={`Posts tagged ${tag}`}>
   <h1 class="page-title"><span class="prompt">$</span> grep -l "{tag}" posts/</h1>
   {posts.map((post) => <PostCard post={post} />)}
 </BaseLayout>

@@ -1,6 +1,6 @@
 # blog
 
-Terminal-themed personal blog built with [Astro](https://astro.build) and deployed to GitHub Pages.
+Terminal-themed personal blog, deployed to GitHub Pages.
 
 ## Configure (one time)
 
